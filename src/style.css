@@ -1,0 +1,30 @@
+@import "normalize.css/normalize.css";
+
+/* sticky footer layout (WDD style) */
+html,
+body {
+  height: 100%;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: #0B0F14;
+  color: #fff;
+  font-family: system-ui, Arial, sans-serif;
+}
+
+main {
+  flex: 1;
+  padding: 1rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.site-header,
+.site-footer {
+  background: #111827;
+  padding: 1rem 1.25rem;
+  border-block: 1px solid #1f2937;
+}
