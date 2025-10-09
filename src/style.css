@@ -91,3 +91,81 @@ main {
   }
 }
 /* ________________________________________________ */
+
+/* tabs + skip */
+.skip-link {
+  position: absolute;
+  left: -9999px
+}
+
+.skip-link:focus {
+  left: 1rem;
+  top: 1rem;
+  z-index: 10;
+  background: #fff;
+  color: #111;
+  padding: .5rem;
+  border-radius: .5rem
+}
+
+.tabs {
+  display: flex;
+  gap: .5rem;
+  list-style: none;
+  padding: 0;
+  margin: .5rem 0 0
+}
+
+.tabs a {
+  display: inline-block;
+  padding: .4rem .7rem;
+  border-radius: .5rem;
+  border: 1px solid #374151;
+  color: #fff;
+  text-decoration: none
+}
+
+.tabs a[aria-current="page"] {
+  background: #1f2937
+}
+
+.list {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0;
+  display: grid;
+  gap: .5rem
+}
+
+.row {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #111827;
+  border: 1px solid #1f2937;
+  padding: .6rem .8rem;
+  border-radius: .6rem;
+  color: #fff
+}
+
+.details {
+  background: #0f172a;
+  border: 1px solid #1f2937;
+  border-radius: .6rem;
+  padding: .6rem .8rem;
+  margin-top: .3rem
+}
+
+.fav {
+  margin-left: .5rem;
+  border: 1px solid #374151;
+  background: #0b1220;
+  color: #fff;
+  border-radius: .4rem;
+  padding: .2rem .4rem
+}
+
+.fav[aria-pressed="true"] {
+  background: #374151
+}
