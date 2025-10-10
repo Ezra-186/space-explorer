@@ -1,30 +1,30 @@
-import { renderView as renderAPOD } from "./views/apod.mjs";
-import { renderView as renderRover } from "./views/rover.mjs";
-import { renderView as renderLaunches } from "./views/launches.mjs";
+import { renderView as renderAPOD } from './views/apod.mjs';
+import { renderView as renderLaunches } from './views/launches.mjs';
+import { renderView as renderGallery } from './views/gallery.mjs';
 
 const routes = {
-    "/apod": renderAPOD,
-    "/rover": renderRover,
-    "/launches": renderLaunches,
+    '/': renderAPOD,
+    '/apod': renderAPOD,
+    '/launches': renderLaunches,
+    '/gallery': renderGallery
 };
 
 export function startRouter() {
     function render() {
-        const hash = location.hash || "#/apod";
-        const path = hash.replace("#", "");
-        const fn = routes[path] || routes["/apod"];
-        setActiveTab(path);
-        fn(document.getElementById("view"));
+        const hash = location.hash || '#/apod';
+        const path = hash.replace('#', '');
+        (routes[path] || apod)(document.getElementById('view'));
+        document.querySelectorAll('.tabs a').forEach(a => a.removeAttribute('aria-current'));
+        const el = document.getElementById(`tab-${path.slice(1) || 'apod'}`);
+        if (el) el.setAttribute('aria-current', 'page');
     }
-    window.addEventListener("hashchange", render);
+    addEventListener('hashchange', render);
     render();
 }
 
 function setActiveTab(path) {
-    document.querySelectorAll(".tabs a").forEach(a => {
-        a.removeAttribute("aria-current");
-    });
-    const id = path.slice(1);
+    document.querySelectorAll('.tabs a').forEach(a => a.removeAttribute('aria-current'));
+    const id = path.slice(1); // 'apod' | 'gallery' | 'launches'
     const el = document.getElementById(`tab-${id}`);
-    if (el) el.setAttribute("aria-current", "page");
+    if (el) el.setAttribute('aria-current', 'page');
 }
