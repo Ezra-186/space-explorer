@@ -1,12 +1,14 @@
 import { renderView as renderAPOD } from './views/apod.mjs';
 import { renderView as renderLaunches } from './views/launches.mjs';
 import { renderView as renderGallery } from './views/gallery.mjs';
+import { renderView as renderFavorites } from './views/favorites.mjs';
 
 const routes = {
     '/': renderAPOD,
     '/apod': renderAPOD,
+    '/gallery': renderGallery,
     '/launches': renderLaunches,
-    '/gallery': renderGallery
+    '/favorites': renderFavorites
 };
 
 export function startRouter() {

@@ -14,7 +14,7 @@ export async function renderView(main) {
   const grid = main.querySelector("#grid");
 
   try {
-    const photos = await getLatestPhotos(); // defaults to curiosity
+    const photos = await getLatestPhotos();
     grid.innerHTML = photos.map(p => `
       <figure class="tile">
         <img src="${p.img_src}" alt="Sol ${p.sol} ${p.camera.full_name}" loading="lazy" decoding="async">
@@ -25,7 +25,6 @@ export async function renderView(main) {
       </figure>
     `).join("");
 
-    // hook up fav toggles
     grid.querySelectorAll("button.fav").forEach(btn => {
       const id = btn.dataset.id;
       btn.addEventListener("click", () => {

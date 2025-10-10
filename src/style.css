@@ -684,9 +684,39 @@ dialog::backdrop {
   background: #1f2937
 }
 
+
+/* Star Fav */
+.tile,
+.card {
+  position: relative;
+}
+
+.tile .fav,
+.card .fav {
+  position: absolute;
+  top: .5rem;
+  right: .5rem;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border: 1px solid #334155;
+  background: #0b1220cc;
+  color: #fbbf24;
+  display: grid;
+  place-items: center;
+}
+
+.tile .fav[aria-pressed="true"],
+.card .fav[aria-pressed="true"] {
+  background: #1f2937;
+  color: #fde68a;
+}
+
+/* footer */
 .site-footer small {
   display: block;
   padding: 1rem;
   color: #9ca3af;
   text-align: center;
 }
+

@@ -1,4 +1,5 @@
 import { listLaunches } from '../api/spacex.mjs';
+import { isFav, toggleFav } from '../state.mjs';
 
 let state = { upcoming: false, page: 1, hasNext: true, loading: false };
 
@@ -11,9 +12,7 @@ export async function renderView(main) {
         <button id="tab-up" role="tab" aria-selected="${state.upcoming}" data-k="up">Upcoming</button>
       </div>
       <div id="launch-grid" class="grid"></div>
-      <div id="btn-row" class="row">
-        <button id="more" class="btn" hidden>Load more</button>
-      </div>
+      <div class="row"><button id="more" class="btn" hidden>Load more</button></div>
       <p id="launch-error" class="error" hidden></p>
       <dialog id="detail"><article></article><form method="dialog"><button>Close</button></form></dialog>
     </section>
@@ -23,6 +22,36 @@ export async function renderView(main) {
     const more = main.querySelector('#more');
     const err = main.querySelector('#launch-error');
     const dlg = main.querySelector('#detail');
+
+    // ONE-TIME EVENT DELEGATION (outside fill)
+    grid.addEventListener('click', (ev) => {
+        const favBtn = ev.target.closest('button.fav');
+        if (favBtn) {
+            ev.stopPropagation();
+            const id = favBtn.dataset.id;
+            const card = favBtn.closest('.card');
+            let img = card?.querySelector('img')?.src || '';
+            if (img.startsWith('data:image/svg+xml')) img = '';
+            const name = card?.querySelector('h3')?.textContent || '';
+            const on = toggleFav('launch', id, { img, name });
+            favBtn.setAttribute('aria-pressed', String(on));
+            return;
+        }
+
+        const moreBtn = ev.target.closest('button.more');
+        if (moreBtn) {
+            const card = moreBtn.closest('.card');
+            dlg.querySelector('article').innerHTML = card.outerHTML;
+            dlg.showModal();
+        }
+    });
+
+    dlg.addEventListener('click', (e) => {
+        const r = dlg.getBoundingClientRect();
+        const inBox = e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
+        if (!inBox) dlg.close();
+    });
+    addEventListener('keydown', (e) => { if (e.key === 'Escape' && dlg.open) dlg.close(); });
 
     function reset(kind) {
         state = { upcoming: kind === 'up', page: 1, hasNext: true, loading: false };
@@ -44,15 +73,13 @@ export async function renderView(main) {
             state.hasNext = hasNextPage;
             state.page += 1;
 
-            // Empty state 
-            if (!docs.length && state.page === 2) { 
+            if (!docs.length && state.page === 2) {
                 grid.innerHTML = `<p class="muted">No launches found.</p>`;
                 state.hasNext = false;
                 more.hidden = true;
                 return;
             }
 
-            // Build cards 
             const cards = docs.map((l) => {
                 const img =
                     l.links?.patch?.small ||
@@ -63,28 +90,20 @@ export async function renderView(main) {
                 const rocket = typeof l.rocket === 'object' ? l.rocket?.name : '';
 
                 return `
-        <article class="card">
-          <img src="${img}" alt="${l.name}" loading="lazy" decoding="async">
-          <div class="card-body">
-            <h3>${l.name}</h3>
-            <p>${date}${rocket ? ' • ' + rocket : ''}</p>
-            <button class="btn more" data-id="${l.id}">Details</button>
-          </div>
-        </article>
-      `;
+          <article class="card">
+            <button class="fav" data-id="${l.id}" aria-pressed="${isFav('launch', l.id)}">★</button>
+            <img src="${img}" alt="${l.name}" loading="lazy" decoding="async">
+            <div class="card-body">
+              <h3>${l.name}</h3>
+              <p>${date}${rocket ? ' • ' + rocket : ''}</p>
+              <button class="btn more" data-id="${l.id}">Details</button>
+            </div>
+          </article>
+        `;
             }).join('');
 
             grid.insertAdjacentHTML('beforeend', cards);
             more.hidden = !state.hasNext;
-
-            // details dialog hookup
-            grid.querySelectorAll('button.more').forEach((b) => {
-                b.onclick = () => {
-                    const card = b.closest('.card');
-                    dlg.querySelector('article').innerHTML = card.outerHTML;
-                    dlg.showModal();
-                };
-            });
 
         } catch (e) {
             err.textContent = `Could not load launches. ${e.message}`;
@@ -94,7 +113,6 @@ export async function renderView(main) {
             more.disabled = false;
         }
     }
-
 
     // tabs
     main.querySelectorAll('[role="tab"]').forEach((tab) => {
