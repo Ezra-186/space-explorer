@@ -766,9 +766,51 @@ dialog::backdrop {
 .chip:focus-visible,
 .menu-toggle:focus-visible,
 .modal-close:focus-visible,
-.brand:focus-visible {
+.brand:focus-visible,
+.source-link:focus-visible {
   outline: 2px solid #38bdf8;
   outline-offset: 2px;
+}
+
+/* Hero new */
+.hero {
+  position: relative;
+  overflow: hidden;
+  margin: 0 auto 1.25rem;
+  max-width: 1200px;
+  border-radius: 10px;
+}
+
+.hero-inner {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  background: #eef2f3;
+}
+
+.hero img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.hero-copy {
+  position: absolute;
+  inset: auto 1rem 1rem 1rem;
+  background: color-mix(in oklab, black 35%, transparent);
+  color: #fff;
+  padding: .75rem 1rem;
+  border-radius: 8px;
+}
+
+.hero-copy h1 {
+  margin: 0 0 .25rem;
+  font-size: clamp(1.25rem, 2vw + 1rem, 2rem);
+}
+
+.hero-copy p {
+  margin: 0;
+  opacity: .95;
 }
 
 /* footer */
@@ -778,3 +820,47 @@ dialog::backdrop {
   color: #9ca3af;
   text-align: center;
 }
+
+/* ---- APOD Card---- */
+.card.hero .content a { color: inherit; }
+
+.card.hero .content a.source-link {
+  display: inline-block;
+  padding: .35rem .75rem;
+  border: 1px solid #334155;
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: 600;
+  background: #111827;
+}
+
+.card.hero .content a.source-link:hover {
+  background: #1f2937;
+}
+
+.card.hero .content p.muted { margin-top: .5rem; }
+
+/* ---- Media modal---- */
+#media-modal {
+  border: none;
+  padding: 0;
+  border-radius: 12px;
+  max-width: min(1000px, 92vw);
+  width: fit-content;
+  background: #0b0f1a;
+  color: #e5e7eb;
+}
+#media-modal::backdrop { background: rgba(0,0,0,.65); }
+
+.modal-figure { margin: 0; }
+#modal-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 80vh;
+  object-fit: contain;
+  border-radius: 12px 12px 0 0;
+}
+#modal-caption { padding: .75rem 1rem 1rem; color: #94a3b8; }
+
+.card.hero img { cursor: zoom-in; }
