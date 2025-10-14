@@ -5,7 +5,8 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <!-- SEO -->
-  <meta name="description" content="Explore NASA images, the Astronomy Picture of the Day, and SpaceX launches — all in one student-built app with vanilla JS." />
+  <meta name="description"
+    content="Explore NASA images, the Astronomy Picture of the Day, and SpaceX launches — all in one student-built app with vanilla JS." />
   <link rel="canonical" href="https://ezra-186.github.io/space-explorer/" />
 
   <!-- Open Graph / Facebook -->
@@ -13,22 +14,26 @@
   <meta property="og:site_name" content="Space Explorer" />
   <meta property="og:url" content="https://ezra-186.github.io/space-explorer/" />
   <meta property="og:title" content="Space Explorer — NASA Images, APOD & SpaceX Launches" />
-  <meta property="og:description" content="Browse NASA's media library, see today's APOD, and explore past & upcoming SpaceX launches." />
+  <meta property="og:description"
+    content="Browse NASA's media library, see today's APOD, and explore past & upcoming SpaceX launches." />
   <meta property="og:image" content="https://ezra-186.github.io/space-explorer/logo-comet2.webp" />
   <meta property="og:image:alt" content="Space Explorer comet logo" />
 
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Space Explorer — NASA Images, APOD & SpaceX Launches" />
-  <meta name="twitter:description" content="Browse NASA's media library, see today's APOD, and explore SpaceX launches." />
+  <meta name="twitter:description"
+    content="Browse NASA's media library, see today's APOD, and explore SpaceX launches." />
   <meta name="twitter:image" content="https://ezra-186.github.io/space-explorer/logo-comet2.webp" />
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@400;600;800&display=swap"
+    rel="stylesheet">
   <title>Space Explorer</title>
-  <link rel="stylesheet" href="/src/style.css" />
+  <!-- <link rel="stylesheet" href="/src/style.css" /> -->
   <link rel="icon" type="image/webp" href="/logo-comet.webp" />
 </head>
 
@@ -38,7 +43,7 @@
   <header class="site-header">
     <h1 class="site-title">
       <a class="brand" href="#/">
-        <img src="/logo-comet2.webp" alt="Space Explorer logo" width="40" height="40" />
+        <img src="./logo-comet2.webp" alt="Space Explorer logo" width="40" height="40" />
         <span>Space Explorer</span>
       </a>
     </h1>
@@ -52,13 +57,14 @@
         <li><a role="tab" id="tab-apod" href="#/apod">APOD</a></li>
         <li><a role="tab" id="tab-gallery" href="#/gallery">Gallery</a></li>
         <li><a role="tab" id="tab-launches" href="#/launches">Launches</a></li>
+        <li><a role="tab" id="tab-neo" href="#/neo">Asteroids</a></li>
         <li><a role="tab" id="tab-favorites" href="#/favorites">Favorites</a></li>
       </ul>
     </nav>
   </header>
 
   <main id="view" class="container" tabindex="-1" aria-live="polite"></main>
-  
+
 
   <footer class="site-footer">
     <small>
@@ -74,7 +80,7 @@
       <figcaption id="modal-caption"></figcaption>
     </figure>
   </dialog>
-  <script type="module" src="/src/main.mjs"></script>
+  <script type="module" src="./src/main.mjs"></script>
 </body>
 
 </html>

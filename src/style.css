@@ -1,4 +1,5 @@
 @import "normalize.css/normalize.css";
+
 :root {
   --font-sans: "Space Grotesk", Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
 }
@@ -42,7 +43,7 @@ main {
   border-block: 1px solid #1f2937;
 }
 
-/* APOD card + skeleton */
+/* APOD card*/
 .card {
   background: #0f172a;
   border: 1px solid #1f2937;
@@ -264,19 +265,18 @@ dialog img {
   display: block;
 }
 
-/* ---------- APOD "hero" card ---------- */
+/* ---------- APOD hero card ---------- */
 .card.hero img {
   /* nice tall banner that crops elegantly */
   height: clamp(240px, 45vh, 460px);
   object-fit: cover;
 }
 
-/* ---------- Gallery grid (1/2/3/4 across) ---------- */
+/* ---------- Gallery grid---------- */
 .gallery-grid {
   display: grid;
   gap: 1rem;
   grid-template-columns: 1fr;
-  /* mobile default */
 }
 
 @media (min-width: 560px) {
@@ -374,7 +374,6 @@ dialog::backdrop {
 }
 
 /* Hamburger */
-/* ----- header + container (unchanged) ----- */
 .site-header {
   display: flex;
   align-items: center;
@@ -403,7 +402,7 @@ dialog::backdrop {
   margin: 0 auto
 }
 
-/* ----- hamburger that morphs to X ----- */
+/* ----- hamburger X ----- */
 .menu-toggle {
   display: inline-flex;
   align-items: center;
@@ -458,9 +457,8 @@ dialog::backdrop {
   }
 }
 
-/* ----- MOBILE: dropdown panel under the button ----- */
+/* ----- MOBILE: dropdown panel ----- */
 .menu-panel {
-  /* hidden by default on mobile */
   display: none;
   position: absolute;
   top: calc(100% + 8px);
@@ -514,7 +512,7 @@ dialog::backdrop {
   border-radius: 10px
 }
 
-/* menu hover + active */
+/* menu hover*/
 .tabs a {
   color: #cbd5e1;
   text-decoration: none;
@@ -531,7 +529,7 @@ dialog::backdrop {
   background: #1f2937
 }
 
-/* ----- DESKTOP: pills inline, no dropdown styling ----- */
+/* ----- DESKTOP: pills inline ----- */
 @media (min-width:768px) {
   .menu-panel {
     position: static;
@@ -556,7 +554,7 @@ dialog::backdrop {
   }
 }
 
-/* ----- APOD hero, gallery grid remain ----- */
+/* ----- APOD hero, gallery grid ----- */
 .card.hero img {
   height: clamp(240px, 45vh, 460px);
   object-fit: cover
@@ -610,7 +608,7 @@ dialog::backdrop {
 
 
 
-/* Modal polish (you already have modal JS in gallery view) */
+/* Modal polish*/
 dialog.modal {
   border: none;
   padding: 0;
@@ -754,11 +752,18 @@ dialog::backdrop {
   display: inline-flex;
   align-items: center;
 }
-.site-title .brand { text-decoration: none; color: inherit; }
+
+.site-title .brand {
+  text-decoration: none;
+  color: inherit;
+}
 
 
 @media (max-width: 480px) {
-  .brand img { width: 32px; height: 32px; }
+  .brand img {
+    width: 32px;
+    height: 32px;
+  }
 }
 
 .tabs a:focus-visible,
@@ -822,7 +827,9 @@ dialog::backdrop {
 }
 
 /* ---- APOD Card---- */
-.card.hero .content a { color: inherit; }
+.card.hero .content a {
+  color: inherit;
+}
 
 .card.hero .content a.source-link {
   display: inline-block;
@@ -838,7 +845,9 @@ dialog::backdrop {
   background: #1f2937;
 }
 
-.card.hero .content p.muted { margin-top: .5rem; }
+.card.hero .content p.muted {
+  margin-top: .5rem;
+}
 
 /* ---- Media modal---- */
 #media-modal {
@@ -850,9 +859,15 @@ dialog::backdrop {
   background: #0b0f1a;
   color: #e5e7eb;
 }
-#media-modal::backdrop { background: rgba(0,0,0,.65); }
 
-.modal-figure { margin: 0; }
+#media-modal::backdrop {
+  background: rgba(0, 0, 0, .65);
+}
+
+.modal-figure {
+  margin: 0;
+}
+
 #modal-img {
   display: block;
   width: 100%;
@@ -861,6 +876,125 @@ dialog::backdrop {
   object-fit: contain;
   border-radius: 12px 12px 0 0;
 }
-#modal-caption { padding: .75rem 1rem 1rem; color: #94a3b8; }
 
-.card.hero img { cursor: zoom-in; }
+#modal-caption {
+  padding: .75rem 1rem 1rem;
+  color: #94a3b8;
+}
+
+.card.hero img {
+  cursor: zoom-in;
+}
+
+/* News */
+.news-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem;
+}
+
+.news-card {
+  /* layout */
+  display: flex;
+  flex-direction: column;
+
+  /* surface */
+  background: var(--card, #0f172a);
+  border: 1px solid var(--border, #1f2937);
+  border-radius: 14px;
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+
+  /* fx */
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .25);
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+
+.news-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, .35);
+  border-color: #334155;
+}
+
+/* media */
+.news-card img {
+  width: 100%;
+  aspect-ratio: 16/9;
+  object-fit: cover;
+  background: #0b1220;
+  display: block;
+}
+
+/* body */
+.news-card .body {
+  padding: .85rem 1rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: .45rem;
+}
+
+/* meta */
+.news-card .meta {
+  font-size: .85rem;
+  color: var(--muted, #9aa5b1);
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+
+.news-card .source {
+  padding: .15rem .5rem;
+  background: rgba(255, 255, 255, .06);
+  border: 1px solid rgba(255, 255, 255, .08);
+  border-radius: 999px;
+  color: #cbd5e1;
+}
+
+.news-card .dot {
+  opacity: .6
+}
+
+/* title */
+.news-card .title {
+  font-size: 1rem;
+  line-height: 1.3;
+  font-weight: 600;
+  color: #e5e7eb;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* focus */
+.news-card:focus-visible {
+  outline: 2px solid #60a5fa;
+  outline-offset: 2px;
+}
+
+/* motion */
+@media (prefers-reduced-motion:reduce) {
+  .news-card {
+    transition: none;
+  }
+}
+
+.news-grid .news-card,
+.news-grid .news-card:link,
+.news-grid .news-card:visited {
+  color: inherit;
+  text-decoration: none;
+}
+
+.news-grid .news-card .title a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.news-grid .news-card:hover .title,
+.news-grid .news-card:focus-visible .title {
+  color: #c7d2fe;
+}
+
+/* End News */

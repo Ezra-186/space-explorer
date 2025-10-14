@@ -1,6 +1,9 @@
 import { listLaunches } from '../api/spacex.mjs';
 import { isFav, toggleFav } from '../state.mjs';
 
+// storage: last selected tab
+const TAB_KEY = "launches:tab";
+
 let state = { upcoming: false, page: 1, hasNext: true, loading: false };
 
 export async function renderView(main) {
@@ -8,8 +11,8 @@ export async function renderView(main) {
     <section>
       <h2>SpaceX Launches</h2>
       <div class="tabs" role="tablist">
-        <button id="tab-past" role="tab" aria-selected="${!state.upcoming}" data-k="past">Past</button>
-        <button id="tab-up" role="tab" aria-selected="${state.upcoming}" data-k="up">Upcoming</button>
+        <button id="tab-past" role="tab" aria-selected="false" data-k="past">Past</button>
+        <button id="tab-up" role="tab" aria-selected="false" data-k="up">Upcoming</button>
       </div>
       <div id="launch-grid" class="grid"></div>
       <div class="row"><button id="more" class="btn" hidden>Load more</button></div>
@@ -18,12 +21,22 @@ export async function renderView(main) {
     </section>
   `;
 
+    // ui: refs
     const grid = main.querySelector('#launch-grid');
     const more = main.querySelector('#more');
     const err = main.querySelector('#launch-error');
     const dlg = main.querySelector('#detail');
+    const tabPast = main.querySelector('#tab-past');
+    const tabUp = main.querySelector('#tab-up');
 
-    // ONE-TIME EVENT DELEGATION (outside fill)
+    // ui: tab selection
+    function setTabSelected(kind) {
+        const pastSel = kind !== 'up';
+        tabPast.setAttribute('aria-selected', String(pastSel));
+        tabUp.setAttribute('aria-selected', String(!pastSel));
+    }
+
+    // events: card actions
     grid.addEventListener('click', (ev) => {
         const favBtn = ev.target.closest('button.fav');
         if (favBtn) {
@@ -46,6 +59,7 @@ export async function renderView(main) {
         }
     });
 
+    // modal: close
     dlg.addEventListener('click', (e) => {
         const r = dlg.getBoundingClientRect();
         const inBox = e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
@@ -53,11 +67,14 @@ export async function renderView(main) {
     });
     addEventListener('keydown', (e) => { if (e.key === 'Escape' && dlg.open) dlg.close(); });
 
+    // data: reset list
     function reset(kind) {
         state = { upcoming: kind === 'up', page: 1, hasNext: true, loading: false };
+        localStorage.setItem(TAB_KEY, kind); // storage: remember tab
         grid.innerHTML = '';
     }
 
+    // data: load page
     async function fill() {
         if (state.loading || !state.hasNext) return;
         state.loading = true;
@@ -104,7 +121,6 @@ export async function renderView(main) {
 
             grid.insertAdjacentHTML('beforeend', cards);
             more.hidden = !state.hasNext;
-
         } catch (e) {
             err.textContent = `Could not load launches. ${e.message}`;
             err.hidden = false;
@@ -114,19 +130,22 @@ export async function renderView(main) {
         }
     }
 
-    // tabs
+    // tabs: click
     main.querySelectorAll('[role="tab"]').forEach((tab) => {
         tab.onclick = () => {
             const k = tab.dataset.k;
-            main.querySelectorAll('[role="tab"]').forEach((t) => t.setAttribute('aria-selected', String(t === tab)));
+            setTabSelected(k);
             reset(k === 'up' ? 'up' : 'past');
             fill();
         };
     });
 
-    more.onclick = fill;
-
-    // first load
-    reset(state.upcoming ? 'up' : 'past');
+    // first load: restore tab
+    const firstKind = localStorage.getItem(TAB_KEY) || (state.upcoming ? 'up' : 'past');
+    setTabSelected(firstKind);
+    reset(firstKind);
     fill();
+
+    // more: click
+    more.onclick = fill;
 }

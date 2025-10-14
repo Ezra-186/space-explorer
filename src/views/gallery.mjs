@@ -1,10 +1,11 @@
 import { searchImages } from '../api/nasa-images.mjs';
 import { isFav, toggleFav } from '../state.mjs';
 
+// ui: placeholder
 const PLACEHOLDER =
   "data:image/svg+xml;utf8,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27320%27 height=%27180%27%3E%3Crect width=%27100%25%27 height=%27100%25%27 fill=%27%23111827%27/%3E%3Ctext x=%2750%25%27 y=%2750%25%27 dominant-baseline=%27middle%27 text-anchor=%27middle%27 fill=%27%23a3a3a3%27 font-family=%27system-ui%27 font-size=%2714%27%3ENo%20image%3C/text%3E%3C/svg%3E";
 
-// quick-pick categories
+// ui: quick-pick categories
 const SUGGESTIONS = [
   'Galaxy', 'Nebula', 'Andromeda', 'Orion Nebula', 'Milky Way',
   'Supernova', 'Aurora', 'Eclipse', 'Comet',
@@ -12,7 +13,8 @@ const SUGGESTIONS = [
   'Hubble', 'James Webb', 'International Space Station'
 ];
 
-let q = 'Star';
+// storage: last search (fallback "Star")
+let q = localStorage.getItem("gallery:lastQ") || 'Star';
 let page = 1;
 let loading = false;
 let selectedChip = '';
@@ -44,6 +46,7 @@ export async function renderView(main) {
     </section>
   `;
 
+  // ui: refs
   const grid = main.querySelector('#img-grid');
   const more = main.querySelector('#more');
   const err = main.querySelector('#img-error');
@@ -55,12 +58,14 @@ export async function renderView(main) {
   const sentinel = main.querySelector('#sentinel');
   const chipsWrap = main.querySelector('#chips');
 
+  // ui: chip pressed state
   function updateChipPressed() {
     chipsWrap.querySelectorAll('.chip').forEach(b =>
       b.setAttribute('aria-pressed', String(b.dataset.q === selectedChip))
     );
   }
 
+  // ui: quick-pick chips
   function renderChips() {
     chipsWrap.innerHTML = SUGGESTIONS.map(label => `
       <button type="button" class="chip" data-q="${label}" aria-pressed="${label === selectedChip}">
@@ -78,13 +83,16 @@ export async function renderView(main) {
     });
   }
 
+  // data: reset list
   function reset(newQ) {
     q = newQ;
+    localStorage.setItem("gallery:lastQ", q);
     page = 1;
     grid.innerHTML = '';
     err.hidden = true;
   }
 
+  // data: load page
   async function fill() {
     if (loading) return;
     loading = true; more.disabled = true;
@@ -94,7 +102,7 @@ export async function renderView(main) {
       page += 1;
       more.hidden = items.length < 100;
 
-      // cards with favorites
+      // ui: cards + favorites
       const cards = items.map((it) => {
         const thumb = it.thumb || PLACEHOLDER;
         const full = it.full || it.thumb || thumb;
@@ -112,6 +120,7 @@ export async function renderView(main) {
       }).join('');
       grid.insertAdjacentHTML('beforeend', cards);
 
+      // ui: delegation (fav + zoom)
       if (!grid._delegated) {
         grid._delegated = true;
         grid.addEventListener('click', (ev) => {
@@ -120,7 +129,7 @@ export async function renderView(main) {
             ev.preventDefault();
             ev.stopPropagation();
             const id = favBtn.dataset.id;
-            const imgEl = favBtn.nextElementSibling; 
+            const imgEl = favBtn.nextElementSibling;
             let thumb = imgEl?.getAttribute('src') || '';
             const title = imgEl?.getAttribute('alt') || '';
             if (thumb.startsWith('data:image/svg+xml')) thumb = '';
@@ -129,7 +138,6 @@ export async function renderView(main) {
             return;
           }
 
-          // open modal on image click
           const pic = ev.target.closest('img');
           if (pic && grid.contains(pic)) {
             imgFull.src = pic.dataset.full || pic.src;
@@ -147,7 +155,7 @@ export async function renderView(main) {
     }
   }
 
-  // form submit (kept)
+  // form: submit
   form.onsubmit = (ev) => {
     ev.preventDefault();
     const value = input.value.trim() || 'Star';
@@ -157,10 +165,10 @@ export async function renderView(main) {
     fill();
   };
 
-  // manual "Load more" (fallback)
+  // more: click
   more.onclick = fill;
 
-  // modal close
+  // modal: close
   closeBtn.onclick = () => zoom.close();
   zoom.addEventListener('click', (e) => {
     const box = zoom.querySelector('.modal-card').getBoundingClientRect();
@@ -169,7 +177,7 @@ export async function renderView(main) {
     if (!inBox) zoom.close();
   });
 
-  // lazy pagination
+  // paging: infinite scroll
   if ('IntersectionObserver' in window) {
     const io = new IntersectionObserver((entries) => {
       entries.forEach((ent) => { if (ent.isIntersecting) fill(); });
@@ -180,8 +188,10 @@ export async function renderView(main) {
     more.style.display = '';
   }
 
-  // init
+  // init: chips + first load
+  selectedChip = SUGGESTIONS.includes(q) ? q : '';
   renderChips();
+  updateChipPressed();
   reset(q);
   fill();
 }
