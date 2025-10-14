@@ -1,10 +1,10 @@
-// css
+// styles first so everything is available
 import "./style.css";
 
-// router + modal
+// app modules
 import { startRouter } from "./router.mjs";
 import { initModal } from "./components/modal.mjs";
-initModal();
+import { initStarfall } from "./components/starfall.mjs";
 
 // footer: year
 const year = document.getElementById("year");
@@ -23,16 +23,20 @@ if (lastmod) {
     }
 }
 
-// route: restore last
+// route: restore last visited hash before starting router
 const savedRoute = localStorage.getItem("route:last");
 if (savedRoute && location.hash !== savedRoute) {
     location.hash = savedRoute;
 }
 
-// start app
+// boot app (once)
 startRouter();
 
-// menu
+// ui extras (after mount)
+initModal();      // image modal (dialog)
+initStarfall();   // decorative falling stars
+
+// mobile menu
 const header = document.querySelector(".site-header");
 const toggle = document.querySelector(".menu-toggle");
 const panel = document.getElementById("primary-nav");
@@ -45,24 +49,24 @@ function setOpen(open) {
 }
 
 if (toggle && panel) {
-    // menu: toggle
+    // open/close
     toggle.addEventListener("click", () => {
         const open = header?.getAttribute("data-open") === "true";
         setOpen(!open);
     });
 
-    // menu: close on nav click
+    // close after clicking a link
     panel.addEventListener("click", (e) => {
         if (e.target.closest("a")) setOpen(false);
     });
 
-    // route: remember + close menu
+    // remember last route + close menu
     addEventListener("hashchange", () => {
         localStorage.setItem("route:last", location.hash || "#/");
         setOpen(false);
     });
 
-    // menu: click outside
+    // click outside
     document.addEventListener("click", (e) => {
         const open = header?.getAttribute("data-open") === "true";
         if (!open) return;
@@ -71,7 +75,7 @@ if (toggle && panel) {
         setOpen(false);
     });
 
-    // menu: Esc (let dialog handle its own Esc)
+    // Esc (let open dialogs handle their own Esc)
     addEventListener("keydown", (e) => {
         if (e.key === "Escape" && document.querySelector("dialog[open]")) return;
         if (e.key === "Escape") setOpen(false);

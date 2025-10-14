@@ -185,6 +185,8 @@ main {
   background: #374151
 }
 
+
+
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -707,20 +709,97 @@ dialog::backdrop {
   position: absolute;
   top: .5rem;
   right: .5rem;
-  width: 36px;
-  height: 36px;
+  width: 34px;
+  height: 34px;
+  padding: 0;                         /* reset padding from generic .fav */
   border-radius: 999px;
-  border: 1px solid #334155;
-  background: #0b1220cc;
-  color: #fbbf24;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.06);
   display: grid;
   place-items: center;
+  cursor: pointer;
+  transition: transform .15s ease, background .18s ease, box-shadow .18s ease, border-color .18s ease;
 }
 
+/* draw star with CSS (outline by default) */
+.tile .fav::before,
+.card .fav::before {
+  content: "★";
+  font-size: 18px;
+  line-height: 1;
+  color: #a3a3a3;
+  opacity: .8;
+  transform-origin: center;
+  transition: color .18s ease, opacity .18s ease, filter .18s ease, transform .18s ease;
+}
+
+/* hover feedback */
+.tile .fav:hover,
+.card .fav:hover {
+  background: rgba(255,255,255,.10);
+  border-color: rgba(255,255,255,.18);
+  transform: translateY(-1px);
+}
+
+/* ON: filled gold + glow */
 .tile .fav[aria-pressed="true"],
 .card .fav[aria-pressed="true"] {
-  background: #1f2937;
-  color: #fde68a;
+  background:
+    radial-gradient(120% 120% at 30% 20%, rgba(253,224,71,.25), transparent 60%),
+    rgba(255,255,255,.08);
+  border-color: rgba(253,224,71,.45);
+  box-shadow: 0 6px 14px rgba(253,224,71,.14);
+}
+
+.tile .fav[aria-pressed="true"]::before,
+.card .fav[aria-pressed="true"]::before {
+  color: #ffd54a;
+  opacity: 1;
+  filter: drop-shadow(0 0 6px rgba(255,215,90,.55));
+  transform: scale(1.05) rotate(-10deg);
+}
+
+/* click pulse */
+.tile .fav.just-toggled,
+.card .fav.just-toggled {
+  animation: fav-burst .5s ease;
+}
+
+@keyframes fav-burst {
+  0%   { transform: scale(1); }
+  30%  { transform: scale(1.25); }
+  60%  { transform: scale(.96); }
+  100% { transform: scale(1); }
+}
+
+/* expanding ring on toggle */
+.tile .fav.just-toggled::after,
+.card .fav.just-toggled::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: inherit;
+  border: 2px solid #ffd54a;
+  opacity: 0;
+  animation: fav-ring .5s ease;
+}
+
+@keyframes fav-ring {
+  0%   { transform: scale(.6); opacity: .9; }
+  100% { transform: scale(1.7); opacity: 0; }
+}
+
+/* keyboard focus */
+.tile .fav:focus-visible,
+.card .fav:focus-visible {
+  outline: 2px solid #60a5fa;
+  outline-offset: 2px;
+}
+
+/* optional: subtle outline for cards with favorites */
+.card:has(.fav[aria-pressed="true"]),
+.tile:has(.fav[aria-pressed="true"]) {
+  outline: 1px solid rgba(253,224,71,.22);
 }
 
 /* Brand Logo*/
@@ -998,3 +1077,110 @@ dialog::backdrop {
 }
 
 /* End News */
+
+/* --- Falling stars (decorative) ---------------------------------------- */
+#starfall {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+#toggle-stars {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 20;
+  border: 1px solid rgba(255, 255, 255, .12);
+  background: rgba(255, 255, 255, .06);
+  color: #e5e7eb;
+  padding: .4rem .6rem;
+  border-radius: 999px;
+  font: 600 14px/1 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+}
+/* focus ring for keyboard users */
+#toggle-stars:focus-visible {
+  outline: 2px solid #38bdf8;
+  outline-offset: 2px;
+}
+
+#toggle-stars {
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.starwrap {
+  position: absolute;
+  left: var(--x);
+  top: -12vh;
+  animation: sway var(--sway-dur, 7s) ease-in-out var(--delay, 0s) infinite;
+}
+
+.starfall {
+  animation: fall var(--dur, 14s) linear var(--delay, 0s) 1 both;
+}
+
+.star {
+  display: block;
+  width: var(--size, 10px);
+  height: var(--size, 10px);
+  clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%,
+      79% 91%, 50% 70%, 21% 91%, 32% 57%,
+      2% 35%, 39% 35%);
+  background: linear-gradient(hsl(var(--hue, 58) 100% 95%),
+      hsl(var(--hue, 58) 100% 88%));
+  filter: drop-shadow(0 0 6px rgba(255, 255, 220, .9));
+  animation: spin var(--spin, 7s) linear infinite,
+    twinkle 1.6s ease-in-out infinite alternate;
+}
+
+/* motion */
+@keyframes fall {
+  to {
+    transform: translateY(115vh);
+  }
+}
+
+@keyframes sway {
+  50% {
+    transform: translateX(var(--amp, 24px));
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
+@keyframes twinkle {
+  from {
+    opacity: .6
+  }
+
+  to {
+    opacity: 1
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  #starfall,
+  #toggle-stars {
+    display: none;
+  }
+}
+
+canvas.starfall {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+body {
+  isolation: isolate;
+}
+
+/* ---------------------------------------------------------------------- */

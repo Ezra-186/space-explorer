@@ -109,9 +109,12 @@ export async function renderView(main) {
         const title = it.title || 'Image';
         return `
           <figure class="tile">
-            <button class="fav" type="button"
-                    data-id="${it.id}"
-                    aria-pressed="${isFav('img', it.id)}">★</button>
+            <button
+              class="fav"
+              type="button"
+              data-id="${it.id}"
+              aria-pressed="${isFav('img', it.id)}"
+              aria-label="${isFav('img', it.id) ? 'Remove favorite' : 'Add to favorites'}"></button>
             <img src="${thumb}" alt="${title}"
                  loading="lazy" decoding="async" data-full="${full}">
             <figcaption>${title}</figcaption>
@@ -135,6 +138,10 @@ export async function renderView(main) {
             if (thumb.startsWith('data:image/svg+xml')) thumb = '';
             const on = toggleFav('img', id, { thumb, title });
             favBtn.setAttribute('aria-pressed', String(on));
+            favBtn.setAttribute('aria-label', on ? 'Remove favorite' : 'Add to favorites');
+            // kick a short pulse animation
+            favBtn.classList.add('just-toggled');
+            favBtn.addEventListener('animationend', () => favBtn.classList.remove('just-toggled'), { once: true });
             return;
           }
 

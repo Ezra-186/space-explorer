@@ -51,6 +51,10 @@ export async function renderView(main) {
             const name = card?.querySelector('h3')?.textContent || '';
             const on = toggleFav('launch', id, { img, name });
             favBtn.setAttribute('aria-pressed', String(on));
+            favBtn.setAttribute('aria-label', on ? 'Remove favorite' : 'Add to favorites');
+            // animate
+            favBtn.classList.add('just-toggled');
+            favBtn.addEventListener('animationend', () => favBtn.classList.remove('just-toggled'), { once: true });
             return;
         }
 
@@ -110,7 +114,11 @@ export async function renderView(main) {
 
                 return `
           <article class="card">
-            <button class="fav" data-id="${l.id}" aria-pressed="${isFav('launch', l.id)}">★</button>
+            <button
+              class="fav"
+              data-id="${l.id}"
+              aria-pressed="${isFav('launch', l.id)}"
+              aria-label="${isFav('launch', l.id) ? 'Remove favorite' : 'Add to favorites'}"></button>
             <img src="${img}" alt="${l.name}" loading="lazy" decoding="async">
             <div class="card-body">
               <h3>${l.name}</h3>
