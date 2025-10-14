@@ -6,6 +6,9 @@ const TAB_KEY = "launches:tab";
 
 let state = { upcoming: false, page: 1, hasNext: true, loading: false };
 
+const LAUNCH_PLACEHOLDER =
+    "data:image/svg+xml;utf8,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27320%27 height=%27180%27%3E%3Crect width=%27100%25%27 height=%27100%25%27 fill=%27%23111827%27/%3E%3Ctext x=%2750%25%27 y=%2750%25%27 dominant-baseline=%27middle%27 text-anchor=%27middle%27 fill=%27%23a3a3a3%27 font-family=%27system-ui%27 font-size=%2714%27%3ENo%20image%3C/text%3E%3C/svg%3E";
+
 export async function renderView(main) {
     main.innerHTML = `
     <section>
@@ -70,7 +73,7 @@ export async function renderView(main) {
     // data: reset list
     function reset(kind) {
         state = { upcoming: kind === 'up', page: 1, hasNext: true, loading: false };
-        localStorage.setItem(TAB_KEY, kind); // storage: remember tab
+        localStorage.setItem(TAB_KEY, kind);
         grid.innerHTML = '';
     }
 
@@ -101,8 +104,7 @@ export async function renderView(main) {
                 const img =
                     l.links?.patch?.small ||
                     (l.links?.flickr?.original?.[0] ?? '') ||
-                    'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="320" height="180"><rect width="100%25" height="100%25" fill="%23111827"/><text x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" fill="%23a3a3a3" font-family="system-ui" font-size="14">No image</text></svg>';
-
+                    LAUNCH_PLACEHOLDER;
                 const date = new Date(l.date_utc).toLocaleString();
                 const rocket = typeof l.rocket === 'object' ? l.rocket?.name : '';
 
