@@ -1273,3 +1273,10 @@ p.muted {
   background: #111827;
   border-color: #64748b;
 }
+
+.news-card .thumb img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 0.5rem;
+}

@@ -1,9 +1,8 @@
 import { getRandomGalleryImage } from "../api/nasa.mjs";
-import { getArticles } from "../api/news.mjs";
+import { getArticles, NEWS_PLACEHOLDER } from "../api/news.mjs";
 import { openImageModal } from "../components/modal.mjs";
 
 export async function renderView(main) {
-  // scaffold: hero + news areas
   main.innerHTML = `
     <section id="apod-view">
       <div id="apod-skeleton" class="skeleton" style="height:clamp(240px,45vh,460px)"></div>
@@ -22,7 +21,7 @@ export async function renderView(main) {
     </section>
   `;
 
-  // hero: random nasa image
+  // ========== HERO (random NASA image) ==========
   const sk = main.querySelector("#apod-skeleton");
   const card = main.querySelector("#apod-card");
   const err = main.querySelector("#apod-error");
@@ -67,23 +66,31 @@ export async function renderView(main) {
     sk?.remove();
   }
 
-  // news: spaceflight news api
+  // ========== NEWS (with standby image) ==========
   const newsGrid = main.querySelector("#news-grid");
   const newsErr = main.querySelector("#news-error");
 
   try {
     const items = await getArticles({ limit: 6 });
+
+    // always render an img
     newsGrid.innerHTML = items.map(a => `
       <article class="news-card">
         <a class="thumb" href="${a.url}" target="_blank" rel="noopener">
-          ${a.image ? `<img src="${a.image}" alt="${a.title}" loading="lazy" decoding="async">` : ""}
+          <img
+            src="${a.image || NEWS_PLACEHOLDER}"
+            alt="${a.title || 'Space news image'}"
+            loading="lazy"
+            decoding="async"
+            referrerpolicy="no-referrer"
+          >
         </a>
         <div class="body">
           <h3 class="title">
             <a href="${a.url}" target="_blank" rel="noopener">${a.title}</a>
           </h3>
           <p class="meta">
-            <span class="source">${a.site}</span>
+            <span class="source">${a.site || ""}</span>
             <span class="dot">•</span>
             <time datetime="${new Date(a.published).toISOString()}">
               ${new Date(a.published).toLocaleString([], { year: "numeric", month: "short", day: "2-digit" })}
@@ -92,6 +99,14 @@ export async function renderView(main) {
         </div>
       </article>
     `).join("");
+
+    // if any image fails to load, swap to placeholder
+    newsGrid.querySelectorAll("img").forEach(img => {
+      img.onerror = () => {
+        img.src = NEWS_PLACEHOLDER;
+        img.onerror = null;
+      };
+    });
   } catch (e) {
     newsGrid.innerHTML = "";
     newsErr.textContent = e.message || "Failed to load space news. Spaceflight News is having issues right now. The rest of the app still works.";

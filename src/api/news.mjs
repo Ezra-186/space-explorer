@@ -1,56 +1,60 @@
 const SNAPI_BASE = "https://api.spaceflightnewsapi.net/v4";
 
-// RSS feeds (no keys)
+// Try these feeds first. Order matters for speed.
 const RSS_FEEDS = [
+    { site: "SpaceNews", url: "https://spacenews.com/feed/" },
     { site: "Space.com", url: "https://www.space.com/feeds/all" },
     { site: "NASA", url: "https://www.nasa.gov/rss/dyn/breaking_news.rss" },
-    { site: "SpaceNews", url: "https://spacenews.com/feed/" },
-    { site: "Phys.org", url: "https://phys.org/rss-feed/space-news/" }
+    { site: "JPL", url: "https://www.jpl.nasa.gov/feeds/news" },
+    { site: "Phys.org", url: "https://phys.org/rss-feed/space-news/" },
+    { site: "NASA Blog", url: "https://blogs.nasa.gov/news/feed/" },
+    { site: "ESA", url: "https://www.esa.int/rssfeed/Our_Activities/Space_Science" }
 ];
 
-// CORS proxies (try each)
+// Proxies. Fast ones first.
+function viaJina(u) {
+    return `https://r.jina.ai/${u}`;
+}
 const PROXIES = [
-    (u) => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
+    (u) => viaJina(u),
     (u) => `https://cors.isomorphic-git.org/${u}`,
+    (u) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
+    (u) => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
     (u) => `https://thingproxy.freeboard.io/fetch/${u}`
 ];
 
 const https = (u) => String(u || "").replace(/^http:/, "https:");
 
-// tiny SVG so cards are never “blank”
-const PLACEHOLDER_IMG =
-    "data:image/svg+xml;utf8," +
-    encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='640' height='360'>
-  <rect width='100%' height='100%' fill='#0e1624'/>
-  <text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle'
-        font-family='system-ui' font-size='20' fill='#6b7a90'>Space news</text>
-</svg>`);
+// ONE placeholder only (put the jpg in /public for Vite)
+const PLACEHOLDER_IMG = "/space_news.png";
+export const NEWS_PLACEHOLDER = PLACEHOLDER_IMG;
 
-// public API used by the view
+// Memory cache for this tab (10 minutes)
+const _cache = new Map();
+const CACHE_TTL_MS = 10 * 60 * 1000;
+
+// Public API
 export async function getArticles({ limit = 6, search = "" } = {}) {
-    // 1) Spaceflight News API (JSON)
     try {
-        const list = await fetchSnapi({ limit, search });
+        const list = await fetchSnapi({ limit, search, timeoutMs: 1500 });
         if (list.length) return list;
     } catch { }
 
-    // 2) RSS fallback (XML → JS objects)
-    const fallback = await fetchRss(limit);
-    if (fallback.length) return fallback;
+    const items = await fetchRssFast(limit, search);
+    if (items.length) return items;
 
-    // 3) give up
     throw new Error("Space news temporarily unavailable");
 }
 
-/* ---------------- SNAPI ---------------- */
-async function fetchSnapi({ limit, search }) {
+/* ---------- SNAPI (JSON) ---------- */
+async function fetchSnapi({ limit, search, timeoutMs }) {
     const qs = new URLSearchParams({ limit: String(limit), ordering: "-published_at" });
     if (search) qs.set("search", search);
 
-    const res = await fetch(`${SNAPI_BASE}/articles/?${qs}`, {
+    const res = await fetchWithTimeout(`${SNAPI_BASE}/articles/?${qs}`, {
         cache: "no-store",
         headers: { Accept: "application/json" }
-    });
+    }, timeoutMs);
 
     const txt = await res.text();
     const ct = res.headers.get("content-type") || "";
@@ -59,59 +63,81 @@ async function fetchSnapi({ limit, search }) {
     const data = JSON.parse(txt);
     if (!res.ok || data?.detail) throw new Error("SNAPI error");
 
-    return (data.results || []).map((a) => ({
+    return (data.results || []).map(a => ({
         id: a.id,
         title: a.title,
         site: a.news_site,
         url: https(a.url),
-        // if feed gives no image, use placeholder so layout is stable
         image: https(a.image_url) || PLACEHOLDER_IMG,
         published: a.published_at,
         summary: a.summary || ""
     }));
 }
 
-/* ---------------- RSS fallback ---------------- */
-async function fetchRss(limit) {
-    const perFeed = Math.max(4, limit); // grab a few from each
+/* ---------- RSS fast fallback ---------- */
+async function fetchRssFast(limit, search) {
+    const want = limit;
+    const got = [];
 
-    const batches = await Promise.allSettled(
-        RSS_FEEDS.map((f) => fetchRssWithProxies(f, perFeed))
+    for (const feed of RSS_FEEDS) {
+        if (got.length >= want) break;
+
+        // cached
+        const cached = readCache(feed.url);
+        let items;
+        if (cached) {
+            items = cached;
+        } else {
+            items = await raceProxiesForFeed(feed, Math.max(4, want));
+            if (items.length) writeCache(feed.url, items);
+        }
+
+        const filtered = search
+            ? items.filter(x => matchSearch(x, search))
+            : items;
+
+        for (const a of filtered) {
+            if (got.length < want) got.push(a);
+            else break;
+        }
+    }
+
+    // sort newest first
+    got.sort((a, b) => new Date(b.published) - new Date(a.published));
+    return got.slice(0, want);
+}
+
+async function raceProxiesForFeed(feed, maxItems) {
+    const urls = PROXIES.map(make => make(addBust(feed.url)));
+    const attempts = urls.map(u =>
+        new Promise(async (resolve, reject) => {
+            try {
+                const out = await fetchOneRssOnce(u, feed, maxItems, 2500);
+                if (out.length) resolve(out);
+                else reject(new Error("empty"));
+            } catch (e) {
+                reject(e);
+            }
+        })
     );
 
-    // keep good results
-    const merged = [];
-    for (const b of batches) if (b.status === "fulfilled") merged.push(...b.value);
-
-    // ort by date desc, trim
-    const seen = new Set();
-    const unique = merged.filter((a) => {
-        const key = a.url || a.title;
-        if (seen.has(key)) return false;
-        seen.add(key);
-        return true;
-    });
-
-    unique.sort((a, b) => new Date(b.published) - new Date(a.published));
-    return unique.slice(0, limit);
-}
-
-async function fetchRssWithProxies(feed, maxItems) {
-    for (const make of PROXIES) {
-        try {
-            const out = await fetchOneRss(make(feed.url), feed, maxItems);
-            if (out.length) return out;
-        } catch { }
-    }
     try {
-        return await fetchOneRss(feed.url, feed, maxItems);
+        return await Promise.any(attempts);
     } catch {
-        return [];
+        try {
+            return await fetchOneRssOnce(addBust(feed.url), feed, maxItems, 2500);
+        } catch {
+            return [];
+        }
     }
 }
 
-async function fetchOneRss(url, feed, maxItems) {
-    const res = await fetchWithTimeout(url, { cache: "no-store" }, 8000);
+function addBust(u) {
+    return u + (u.includes("?") ? "&" : "?") + "_ts=" + Date.now();
+}
+
+async function fetchOneRssOnce(url, feed, maxItems, timeoutMs) {
+    const res = await fetchWithTimeout(url, { cache: "no-store" }, timeoutMs);
     const text = await res.text();
 
     const doc = new DOMParser().parseFromString(text, "application/xml");
@@ -126,7 +152,6 @@ async function fetchOneRss(url, feed, maxItems) {
         const link = qText(node, "link") || qAttr(node, "link[href]");
         const pub = qText(node, "pubDate") || qText(node, "updated") || qText(node, "dc\\:date") || new Date().toISOString();
         const desc = qText(node, "description") || qText(node, "summary") || "";
-
         const img = findImage(node, desc, link);
 
         return {
@@ -141,7 +166,7 @@ async function fetchOneRss(url, feed, maxItems) {
     });
 }
 
-/* ---------------- helpers ---------------- */
+/* ---------- helpers ---------- */
 function qText(node, sel) {
     const el = node.querySelector(sel);
     return el ? (el.textContent || "").trim() : "";
@@ -158,8 +183,6 @@ function stripHtml(s) {
 function toAbsolute(src, base) {
     try { return new URL(src, base).href; } catch { return src; }
 }
-
-// tries common places where feeds put images
 function findImage(node, descHtml, baseLink) {
     const enc = node.querySelector("enclosure[url]");
     if (enc?.getAttribute("url")) return toAbsolute(enc.getAttribute("url"), baseLink);
@@ -180,10 +203,8 @@ function findImage(node, descHtml, baseLink) {
     const img2 = tmp.querySelector("img[src]");
     if (img2) return toAbsolute(img2.getAttribute("src"), baseLink);
 
-    // nothing found so use placeholder
     return PLACEHOLDER_IMG;
 }
-
 function hash(s) {
     let h = 0;
     for (let i = 0; i < (s || "").length; i++) {
@@ -192,8 +213,7 @@ function hash(s) {
     }
     return Math.abs(h);
 }
-
-async function fetchWithTimeout(url, options, ms) {
+async function fetchWithTimeout(url, options, ms = 3000) {
     const controller = new AbortController();
     const t = setTimeout(() => controller.abort(), ms);
     try {
@@ -201,4 +221,24 @@ async function fetchWithTimeout(url, options, ms) {
     } finally {
         clearTimeout(t);
     }
+}
+function matchSearch(item, q) {
+    const s = q.toLowerCase();
+    return (
+        item.title?.toLowerCase().includes(s) ||
+        item.summary?.toLowerCase().includes(s) ||
+        item.site?.toLowerCase().includes(s)
+    );
+}
+function readCache(key) {
+    const hit = _cache.get(key);
+    if (!hit) return null;
+    if (Date.now() - hit.ts > CACHE_TTL_MS) {
+        _cache.delete(key);
+        return null;
+    }
+    return hit.data;
+}
+function writeCache(key, data) {
+    _cache.set(key, { ts: Date.now(), data });
 }
