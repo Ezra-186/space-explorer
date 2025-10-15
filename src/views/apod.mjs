@@ -94,7 +94,7 @@ export async function renderView(main) {
     `).join("");
   } catch (e) {
     newsGrid.innerHTML = "";
-    newsErr.textContent = e.message || "Failed to load space news.";
+    newsErr.textContent = e.message || "Failed to load space news. Spaceflight News is having issues right now. The rest of the app still works.";
     newsErr.hidden = false;
   }
 }
