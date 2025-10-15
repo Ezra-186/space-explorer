@@ -1057,7 +1057,8 @@ dialog::backdrop {
 }
 
 .news-card .dot {
-  opacity: .6
+  color: #cbd5e1;
+  opacity: 1;
 }
 
 /* title */
@@ -1248,3 +1249,27 @@ body .chip:hover,
 body .chip:focus-visible{ background:#111827; border-color:#64748b; }
 
 body :where(.tabs a,.chip,.btn):visited{ color:#f8fafc; }
+.card time,
+.card .content .muted,
+p.muted {
+  color: #cfd8e3;
+}
+
+.site-footer small,
+#year,
+#lastmod {
+  color: #cfd8e3;
+}
+
+.card.hero .content a.source-link {
+  color: #f8fafc;
+  background: #0e1624;
+  border-color: #445069;
+  font-weight: 600;
+}
+
+.card.hero .content a.source-link:hover,
+.card.hero .content a.source-link:focus-visible {
+  background: #111827;
+  border-color: #64748b;
+}
