@@ -1210,3 +1210,41 @@ body {
 }
 
 /* ---------------------------------------------------------------------- */
+
+body .btn{
+  background:#0e1624;  
+  color:#f8fafc;   
+  border-color:#4b5563;
+  font-weight:600;
+}
+body .btn:hover,
+body .btn:focus-visible{ background:#111827; border-color:#64748b; }
+
+body .btn[disabled]{
+  opacity:1; 
+  background:#0d1421;  
+  color:#e5e7eb;  
+  border-color:#445069;
+  cursor:not-allowed;
+}
+
+body .tabs a{
+  background:#0e1624;       
+  color:#f8fafc;  
+  border-color:#4b5563;
+  font-weight:600;
+}
+body .tabs a:hover,
+body .tabs a:focus-visible{ background:#111827; color:#f8fafc; border-color:#64748b; }
+body .tabs a[aria-current="page"]{ background:#111827; color:#f8fafc; }
+
+body .chip{
+  background:#0e1624;
+  color:#f8fafc;
+  border-color:#4b5563;
+  font-weight:600;
+}
+body .chip:hover,
+body .chip:focus-visible{ background:#111827; border-color:#64748b; }
+
+body :where(.tabs a,.chip,.btn):visited{ color:#f8fafc; }
