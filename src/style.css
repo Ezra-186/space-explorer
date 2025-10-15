@@ -229,10 +229,36 @@ main {
   cursor: pointer;
 }
 
+/* keep disabled buttons readable */
 .btn[disabled] {
-  opacity: .6;
+  opacity: 1;
   cursor: not-allowed;
+  color: #aeb7c3;          /* ≥4.5:1 vs dark bg */
+  background: #141d2b;
+  border-color: #263248;
 }
+
+/* --- Forms: high-contrast inputs/selects --- */
+input[type="text"],
+input[type="search"],
+input[type="email"],
+select {
+  background: #0f172a;
+  color: #e5e7eb;                 /* strong foreground */
+  border: 1px solid #334155;
+  border-radius: 10px;
+  padding: .5rem .75rem;
+}
+
+input::placeholder {
+  color: #b6c2cf;                 /* readable placeholder */
+  opacity: 1;                     /* don't dim placeholder */
+}
+
+/* ensure sufficient text contrast on UI pills */
+.tabs a,
+.btn,
+.chip { color: #e5e7eb; }
 
 nav a.active {
   background: #1f2937;
@@ -711,7 +737,7 @@ dialog::backdrop {
   right: .5rem;
   width: 34px;
   height: 34px;
-  padding: 0;                         /* reset padding from generic .fav */
+  padding: 0;
   border-radius: 999px;
   border: 1px solid rgba(255,255,255,.12);
   background: rgba(255,255,255,.06);
@@ -721,7 +747,7 @@ dialog::backdrop {
   transition: transform .15s ease, background .18s ease, box-shadow .18s ease, border-color .18s ease;
 }
 
-/* draw star with CSS (outline by default) */
+/* draw star with CSS */
 .tile .fav::before,
 .card .fav::before {
   content: "★";
@@ -796,7 +822,7 @@ dialog::backdrop {
   outline-offset: 2px;
 }
 
-/* optional: subtle outline for cards with favorites */
+/* subtle outline for cards with favorites */
 .card:has(.fav[aria-pressed="true"]),
 .tile:has(.fav[aria-pressed="true"]) {
   outline: 1px solid rgba(253,224,71,.22);
@@ -1016,7 +1042,7 @@ dialog::backdrop {
 /* meta */
 .news-card .meta {
   font-size: .85rem;
-  color: var(--muted, #9aa5b1);
+  color: #b6c2cf;
   display: flex;
   align-items: center;
   gap: .5rem;
@@ -1078,7 +1104,7 @@ dialog::backdrop {
 
 /* End News */
 
-/* --- Falling stars (decorative) ---------------------------------------- */
+/* --- Falling stars ---------------------------------------- */
 #starfall {
   position: fixed;
   inset: 0;
