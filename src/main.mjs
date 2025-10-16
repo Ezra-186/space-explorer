@@ -1,4 +1,3 @@
-// styles first so everything is available
 import "./style.css";
 
 // app modules
@@ -17,24 +16,31 @@ if (lastmod) {
     if (!Number.isNaN(ts.getTime())) {
         lastmod.dateTime = ts.toISOString();
         lastmod.textContent = ts.toLocaleString([], {
-            year: "numeric", month: "short", day: "2-digit",
-            hour: "2-digit", minute: "2-digit"
+            year: "numeric",
+            month: "short",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
         });
     }
 }
 
-// route: restore last visited hash before starting router
-const savedRoute = localStorage.getItem("route:last");
-if (savedRoute && location.hash !== savedRoute) {
-    location.hash = savedRoute;
+{
+    const savedRoute = localStorage.getItem("route:last");
+    if (savedRoute) {
+        const restore = savedRoute === "#/" ? "#/apod" : savedRoute;
+        if (location.hash !== restore) {
+            location.hash = restore;
+        }
+    }
 }
 
 // boot app (once)
 startRouter();
 
-// ui extras (after mount)
-initModal();      // image modal (dialog)
-initStarfall();   // decorative falling stars
+// ui extras 
+initModal();
+initStarfall();
 
 // mobile menu
 const header = document.querySelector(".site-header");
@@ -49,7 +55,6 @@ function setOpen(open) {
 }
 
 if (toggle && panel) {
-    // open/close
     toggle.addEventListener("click", () => {
         const open = header?.getAttribute("data-open") === "true";
         setOpen(!open);
@@ -60,9 +65,10 @@ if (toggle && panel) {
         if (e.target.closest("a")) setOpen(false);
     });
 
-    // remember last route + close menu
+    // remember last route pluss close menu
     addEventListener("hashchange", () => {
-        localStorage.setItem("route:last", location.hash || "#/");
+        const h = location.hash === "#/" || !location.hash ? "#/apod" : location.hash;
+        localStorage.setItem("route:last", h);
         setOpen(false);
     });
 
@@ -75,7 +81,7 @@ if (toggle && panel) {
         setOpen(false);
     });
 
-    // Esc (let open dialogs handle their own Esc)
+    // Esc 
     addEventListener("keydown", (e) => {
         if (e.key === "Escape" && document.querySelector("dialog[open]")) return;
         if (e.key === "Escape") setOpen(false);

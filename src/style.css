@@ -1280,3 +1280,65 @@ p.muted {
   object-fit: cover;
   border-radius: 0.5rem;
 }
+
+#primary-nav .tabs a.active,
+#primary-nav .tabs a[aria-current="page"],
+#primary-nav .tabs a[aria-selected="true"],
+#primary-nav .tabs li.active>a {
+  color: var(--accent, #7cf);
+  border-bottom: 2px solid currentColor;
+}
+
+.site-footer a#project-video {
+  text-decoration: underline;
+}
+
+.site-footer a#project-video:hover {
+  text-decoration: none;
+}
+
+/* Footer layout: puts the button next to the text nicely */
+.site-footer {
+  display: flex;
+  gap: .75rem;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* Button look */
+.site-footer .btn-video {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .4rem .8rem;
+  border-radius: .5rem;
+  text-decoration: none;
+  font-weight: 600;
+  background: var(--accent, #7cf);
+  color: var(--btn-on-accent, #0b0d12);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, .2);
+  transition: transform .08s ease, filter .12s ease;
+}
+
+.site-footer .btn-video:hover {
+  filter: brightness(.95);
+  transform: translateY(-1px);
+}
+
+.site-footer .btn-video:active {
+  transform: translateY(0);
+}
+
+.site-footer .btn-video:focus-visible {
+  outline: 2px solid var(--accent, #7cf);
+  outline-offset: 2px;
+}
+
+/* Play icon */
+.site-footer .btn-video .icon {
+  width: 1em;
+  height: 1em;
+  display: inline-block;
+  fill: currentColor;
+}

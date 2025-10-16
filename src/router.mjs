@@ -4,6 +4,7 @@ import { renderView as renderLaunches } from "./views/launches.mjs";
 import { renderView as renderFavorites } from "./views/favorites.mjs";
 import { renderView as renderNEO } from "./views/neo.mjs";
 
+// Routes 
 const routes = {
     "/": renderAPOD,
     "/apod": renderAPOD,
@@ -13,16 +14,32 @@ const routes = {
     "/neo": renderNEO,
 };
 
+const DEFAULT_ROUTE = "/apod";
+
+function normalizeRouteFromHash(input) {
+    let h = input || "";
+    if (h.includes("#")) h = h.slice(h.indexOf("#") + 1);
+    if (h.startsWith("#")) h = h.slice(1);
+    h = h.split("?")[0].split("&")[0].replace(/\/+$/, "");
+    if (!h.startsWith("/")) h = `/${h}`;
+    if (h === "/apod") h = "/";
+    if (h === "") h = "/";
+    return h;
+}
+
 export function startRouter() {
     const main = document.getElementById("view");
     if (!main) return;
 
+    // a11y: ensure focus target exists
+    if (!main.hasAttribute("tabindex")) main.setAttribute("tabindex", "-1");
+
     async function render() {
-        const hash = location.hash.replace(/^#/, "");
-        const path = hash || "/apod";
+        // path from current hash
+        const path = normalizeRouteFromHash(location.hash || `#${DEFAULT_ROUTE}`);
         const handler = routes[path] || renderAPOD;
 
-        // view: render with error guard
+        // render with guard
         try {
             await handler(main);
         } catch (e) {
@@ -30,14 +47,25 @@ export function startRouter() {
             main.innerHTML = '<p class="error">Something went wrong loading this view.</p>';
         }
 
-        // nav: highlight active
-        document.querySelectorAll('#primary-nav [role="tab"]')
-            .forEach((a) => a.classList.toggle("active", a.getAttribute("href") === `#${path}`));
+        // ---- nav highlight (robust pluss ARIA) ----
+        const canonicalForHighlight = path === "/" ? "/apod" : path;
+        const currentHref = `#${canonicalForHighlight}`;
 
-        // a11y: focus main
+        document.querySelectorAll('#primary-nav a[role="tab"]').forEach((a) => {
+            const href = a.getAttribute("href") || "";
+            const on = normalizeRouteFromHash(href) === normalizeRouteFromHash(currentHref);
+
+            // class hooks
+            a.classList.toggle("active", on);
+            a.closest("li")?.classList.toggle("active", on);
+            a.setAttribute("aria-selected", on ? "true" : "false");
+            if (on) a.setAttribute("aria-current", "page");
+            else a.removeAttribute("aria-current");
+        });
+
         main.focus({ preventScroll: true });
     }
 
-    addEventListener("hashchange", render);
+    addEventListener("hashchange", render, { passive: true });
     render();
 }

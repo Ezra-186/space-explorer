@@ -54,7 +54,7 @@
 
     <nav id="primary-nav" class="menu-panel" aria-label="Primary">
       <ul class="tabs" role="tablist">
-        <li><a role="tab" id="tab-apod" href="#/apod">APOD</a></li>
+        <li><a class="brand" role="tab" id="tab-apod" href="#/apod">APOD</a></li>
         <li><a role="tab" id="tab-gallery" href="#/gallery">Gallery</a></li>
         <li><a role="tab" id="tab-launches" href="#/launches">Launches</a></li>
         <li><a role="tab" id="tab-neo" href="#/neo">Asteroids</a></li>
@@ -66,11 +66,21 @@
   <main id="view" class="container" tabindex="-1" aria-live="polite"></main>
 
 
-  <footer class="site-footer">
-    <small>
-       Daniel E. Rivera | WDD330 | Space Explorer © <span id="year"></span> · Updated: <time id="lastmod"></time>
-    </small>
-  </footer>
+<footer class="site-footer">
+  <small>
+    Daniel E. Rivera | WDD330 | Space Explorer © <span id="year"></span> ·
+    Updated: <time id="lastmod"></time>
+  </small>
+
+  <a id="project-video" class="btn-video" href="https://youtu.be/CbLYVoBx0SI" target="_blank" rel="noopener"
+    aria-label="Watch the Space Explorer demo video">
+    <svg viewBox="0 0 24 24" aria-hidden="true" class="icon">
+      <path d="M8 5v14l11-7z"></path>
+    </svg>
+    <span>Demonstration Video Here</span>
+  </a>
+</footer>
+
 
   <!-- media modal -->
   <dialog id="media-modal" class="modal" aria-label="Image preview">

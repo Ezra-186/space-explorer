@@ -34,11 +34,8 @@ function cleanSrc(v = "") {
         const id = normId(it.id);
         if (!type || !id) continue;
 
-        // normalize media fields
         const thumb = cleanSrc(it.thumb);
         const img = cleanSrc(it.img);
-
-        // IMPORTANT: drop image favorites that have no usable media
         if (type === "img" && !(thumb || img)) continue;
 
         const k = favKey(type, id);
@@ -55,7 +52,6 @@ function cleanSrc(v = "") {
         });
     }
 
-    // dedupe across legacy "image" vs "img" by collapsing to "img"
     const collapsed = [];
     const keepSeen = new Set();
     for (const it of out) {
@@ -83,7 +79,7 @@ export function getFavs(type) {
     return list.filter(it => it.type === t);
 }
 
-// Remove all variants for this item (handles "img" and legacy "image")
+// Remove all variants for this item
 export function toggleFav(type, id, payload = {}) {
     const t = normType(type);
     const i = normId(id);
@@ -111,7 +107,6 @@ export function toggleFav(type, id, payload = {}) {
         img: cleanSrc(payload.img)
     };
 
-    // if it's an image favorite and there is no usable media, don't store it
     if (entry.type === "img" && !(entry.thumb || entry.img)) return false;
 
     writeFavs([...kept, entry]);
