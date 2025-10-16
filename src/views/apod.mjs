@@ -100,12 +100,17 @@ export async function renderView(main) {
       </article>
     `).join("");
 
-    // if any image fails to load, swap to placeholder
-    newsGrid.querySelectorAll("img").forEach(img => {
-      img.onerror = () => {
-        img.src = NEWS_PLACEHOLDER;
-        img.onerror = null;
+    newsGrid.querySelectorAll(".news-card img").forEach((img) => {
+      const fallback = () => {
+        if (img.src !== NEWS_PLACEHOLDER) img.src = NEWS_PLACEHOLDER;
       };
+      img.addEventListener("error", fallback, { once: true });
+      if (img.src.startsWith("http://")) {
+        img.src = img.src.replace("http://", "https://");
+      }
+      if (img.complete && (img.naturalWidth === 0 || img.naturalHeight === 0)) {
+        fallback();
+      }
     });
   } catch (e) {
     newsGrid.innerHTML = "";
